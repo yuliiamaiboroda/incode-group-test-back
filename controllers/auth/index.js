@@ -18,8 +18,15 @@ const logout = async (req, res, next) => {
   res.status(204).send();
 };
 
+const getCurrentUser = async (req, res, next) => {
+  const data = await AuthServices.getCurrentUser(req.user);
+
+  res.status(200).json(data);
+};
+
 module.exports = {
   register,
   login,
   logout,
+  getCurrentUser,
 };

@@ -130,8 +130,22 @@ const logout = async id => {
   );
 };
 
+const getCurrentUser = async user => {
+  const { _id, name, surname, email, role, boss, subordinates } = user;
+  return {
+    _id,
+    name,
+    surname,
+    email,
+    role,
+    boss,
+    subordinates,
+  };
+};
+
 module.exports = {
   register,
   login,
   logout,
+  getCurrentUser,
 };

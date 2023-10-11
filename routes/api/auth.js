@@ -17,6 +17,10 @@ router
     controllerExceptionWrapper(AuthController.login)
   )
   .use(authUser)
-  .post('/logout', controllerExceptionWrapper(AuthController.logout));
+  .post('/logout', controllerExceptionWrapper(AuthController.logout))
+  .get(
+    '/current-user',
+    controllerExceptionWrapper(AuthController.getCurrentUser)
+  );
 
 module.exports = router;
