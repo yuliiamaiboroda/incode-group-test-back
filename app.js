@@ -2,9 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const logger = require('morgan');
 require('dotenv').config();
-// Todo: fix on index files in routes
 
-const authRouter = require('./routes/api/auth');
+const { authRouter, usersRouter } = require('./routes/api');
 
 const { globalErrorHandler } = require('./middlewares');
 
@@ -17,6 +16,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.use('/api/auth', authRouter);
+app.use('/api/users', usersRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Not found' });

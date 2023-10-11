@@ -18,7 +18,7 @@ const userSchema = mongoose.Schema({
     default: USER_ROLES.USER,
   },
   subordinates: [
-    { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [] },
+    { type: mongoose.Schema.Types.ObjectId, required: true, default: [] },
   ],
   boss: {
     type: mongoose.Schema.Types.ObjectId,
