@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const UserModel = require('../../models/');
+const UserModel = require('../../models');
 const {
   ROLES_LIST,
   UPDATE_DEFAULT_CONFIG,

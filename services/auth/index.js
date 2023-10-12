@@ -1,4 +1,4 @@
-const { createAccessToken } = require('../token-check');
+const { createAccessToken } = require('../../helpers/utils');
 const {
   validateRepeatedEmail,
   determineRoleAndBoss,
