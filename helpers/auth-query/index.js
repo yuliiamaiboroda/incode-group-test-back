@@ -1,9 +1,11 @@
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const UserModel = require('../../models');
-const { ROLES_LIST } = require('../../helpers/constants/user-roles');
+const {
+  ROLES_LIST,
+  UPDATE_DEFAULT_CONFIG,
+} = require('../../helpers/constants');
 const { createHttpException } = require('../utils/create-http-exception');
-const { UPDATE_DEFAULT_CONFIG } = require('../constants/update-default-config');
 
 const validateRepeatedEmail = async email => {
   const userWithCurrentEmail = await UserModel.findOne({ email });

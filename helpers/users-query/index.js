@@ -1,10 +1,11 @@
-const UserModel = require('../../models/');
-const { ROLES_LIST } = require('../../helpers/constants/user-roles');
-const { createHttpException } = require('../utils/create-http-exception');
-const {
-  UPDATE_DEFAULT_CONFIG,
-} = require('../../helpers/constants/update-default-config');
 const mongoose = require('mongoose');
+const UserModel = require('../../models/');
+const {
+  ROLES_LIST,
+  UPDATE_DEFAULT_CONFIG,
+  DEFAULT_PROJECTION_CONFIG,
+} = require('../../helpers/constants');
+const { createHttpException } = require('../utils/create-http-exception');
 
 const getAdminUsers = async () => {
   return await UserModel.find({}, { sessionKey: 0, passwordHash: 0 });
@@ -13,7 +14,7 @@ const getAdminUsers = async () => {
 const getSubordinates = async bossId => {
   return await UserModel.find(
     { boss: bossId },
-    { sessionKey: 0, passwordHash: 0 }
+    { ...DEFAULT_PROJECTION_CONFIG }
   );
 };
 
@@ -95,7 +96,7 @@ const updateOldBoss = async (oldBossId, oldBossRole, userId) => {
       role: oldBossRole,
       $pull: { subordinates: new mongoose.Types.ObjectId(userId) },
     },
-    { ...UPDATE_DEFAULT_CONFIG, projection: { passwordHash: 0, sessionKey: 0 } }
+    { ...UPDATE_DEFAULT_CONFIG, projection: { ...DEFAULT_PROJECTION_CONFIG } }
   );
 };
 
@@ -106,7 +107,7 @@ const updateNewBoss = async (newBossId, newBossRole, userId) => {
       role: newBossRole,
       $push: { subordinates: new mongoose.Types.ObjectId(userId) },
     },
-    { ...UPDATE_DEFAULT_CONFIG, projection: { passwordHash: 0, sessionKey: 0 } }
+    { ...UPDATE_DEFAULT_CONFIG, projection: { ...DEFAULT_PROJECTION_CONFIG } }
   );
 };
 
@@ -114,7 +115,7 @@ const updateUser = async (userId, newBossId) => {
   return await UserModel.findByIdAndUpdate(
     userId,
     { boss: new mongoose.Types.ObjectId(newBossId) },
-    { ...UPDATE_DEFAULT_CONFIG, projection: { passwordHash: 0, sessionKey: 0 } }
+    { ...UPDATE_DEFAULT_CONFIG, projection: { ...DEFAULT_PROJECTION_CONFIG } }
   );
 };
 
