@@ -74,19 +74,12 @@ const validateSubordateOfSuberbordinate = async (
     }
   });
 
-  if (repeatedUsers.length > 0)
-    throw createHttpException(
-      403,
-      "Forbidden. a subordinate of a subordinate user cannot be the user's boss"
-    );
+  if (repeatedUsers.length > 0) throw createHttpException(403, 'Forbidden');
 };
 
 const validateSameBoss = async (oldbossId, newBossId) => {
   if (oldbossId.toString() === newBossId.toString())
-    throw createHttpException(
-      400,
-      'This user is already boss for current user'
-    );
+    throw createHttpException(400, 'Bad request');
 };
 
 const updateOldBoss = async (oldBossId, oldBossRole, userId) => {

@@ -292,6 +292,10 @@ seamless functionality within your application.
     }
   }
   ```
+  - 400: Bad Request ( This user is already boss for current user or validation
+    error)
+  - 401: Unauthorized
+  - 403: Forbidden (Access error or forbidden action )
 
 ## Other commands
 
