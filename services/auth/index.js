@@ -1,46 +1,28 @@
-const crypto = require('crypto');
-const bcrypt = require('bcrypt');
-const UserModel = require('../../models/user-model');
-const { ROLES_LIST } = require('../../helpers/constants/user-roles');
 const { createAccessToken } = require('../token-check');
 const {
-  createHttpException,
-} = require('../../helpers/utils/create-http-exception');
-const {
-  UPDATE_DEFAULT_CONFIG,
-} = require('../../helpers/constants/update-default-config');
+  validateRepeatedEmail,
+  determineRoleAndBoss,
+  generateSessionKey,
+  hashPassword,
+  createNewUser,
+  updateBossSubordinates,
+  findUserByEmail,
+  generateUniqueSessionKey,
+  validateUserCredentials,
+  updateSessionKey,
+} = require('../../helpers/auth-query');
 
 const register = async body => {
   const { name, surname, email, password } = body;
+  await validateRepeatedEmail(email);
 
-  const userWithCurrentEmail = await UserModel.findOne({ email });
+  const { role, boss } = await determineRoleAndBoss();
 
-  if (userWithCurrentEmail) throw createHttpException(409, 'Email in use');
+  const sessionKey = generateSessionKey();
 
-  let role;
-  let boss;
+  const passwordHash = await hashPassword(password);
 
-  const usersList = await UserModel.find();
-
-  const adminUserInList = usersList.find(
-    user => user.role === ROLES_LIST.ADMIN
-  );
-
-  if (usersList.length === 0 && !adminUserInList) {
-    role = ROLES_LIST.ADMIN;
-    boss = null;
-  } else {
-    const adminUser = await UserModel.findOne({ role: ROLES_LIST.ADMIN });
-
-    role = ROLES_LIST.USER;
-    boss = adminUser ? adminUser._id : null;
-  }
-
-  const sessionKey = crypto.randomUUID();
-
-  const passwordHash = await bcrypt.hash(password, 10);
-
-  const newUser = await UserModel.create({
+  const newUser = await createNewUser({
     name,
     surname,
     role,
@@ -55,15 +37,9 @@ const register = async body => {
     sessionKey: newUser.sessionKey,
   });
 
-  //Every user with a role other than admin must have a boss. An administrator is appointed upon registration
+  // Every user with a role other than admin must have a boss. An administrator is appointed upon registration
 
-  if (newUser.role !== ROLES_LIST.ADMIN) {
-    await UserModel.findByIdAndUpdate(
-      newUser.boss,
-      { $push: { subordinates: newUser } },
-      UPDATE_DEFAULT_CONFIG
-    );
-  }
+  await updateBossSubordinates(newUser);
 
   return {
     accessToken,
@@ -82,31 +58,20 @@ const register = async body => {
 const login = async body => {
   const { email, password } = body;
 
-  const user = await UserModel.findOne({ email });
+  const user = await findUserByEmail(email);
 
-  if (!user) throw createHttpException(401, 'Unauthorized');
-
-  const isValidPassword = await bcrypt.compare(password, user.passwordHash);
-
-  if (!isValidPassword) throw createHttpException(401, 'Unauthorized');
-
-  let sessionKey;
+  await validateUserCredentials(password, user.passwordHash);
 
   // To protect against repeating sessionKey
-  do {
-    sessionKey = crypto.randomUUID();
-  } while (sessionKey === user.sessionKey);
+
+  const sessionKey = await generateUniqueSessionKey(user.sessionKey);
 
   const accessToken = createAccessToken({
     userId: user._id,
     sessionKey,
   });
 
-  await UserModel.findByIdAndUpdate(
-    user._id,
-    { sessionKey },
-    UPDATE_DEFAULT_CONFIG
-  );
+  await updateSessionKey(user._id, sessionKey);
 
   return {
     accessToken,
@@ -123,11 +88,7 @@ const login = async body => {
 };
 
 const logout = async id => {
-  await UserModel.findByIdAndUpdate(
-    id,
-    { sessionKey: null },
-    UPDATE_DEFAULT_CONFIG
-  );
+  await updateSessionKey(id, null);
 };
 
 const getCurrentUser = async user => {
