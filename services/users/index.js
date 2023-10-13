@@ -18,19 +18,13 @@ const {
 } = require('../../helpers/users-query');
 
 const getUsersList = async user => {
-  switch (user.role) {
-    case ROLES_LIST.ADMIN:
-      return await getAdminUsers();
+  const usersList = {
+    [ROLES_LIST.ADMIN]: await getAdminUsers(),
+    [ROLES_LIST.BOSS]: await getBossUsers(user),
+    [ROLES_LIST.USER]: await getUserById(user.id),
+  };
 
-    case ROLES_LIST.BOSS:
-      return getBossUsers(user);
-
-    case ROLES_LIST.USER:
-      return await getUserById(user.id);
-
-    default:
-      return [];
-  }
+  return usersList[user.role] || [];
 };
 
 const changeBossOfUser = async (currentUserData, body) => {
