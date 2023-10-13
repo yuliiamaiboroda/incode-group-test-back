@@ -296,6 +296,7 @@ seamless functionality within your application.
     error)
   - 401: Unauthorized
   - 403: Forbidden (Access error or forbidden action )
+  - 404: Not found
 
 ## Other commands
 
